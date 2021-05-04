@@ -1,38 +1,44 @@
 import collections
 import math
 
-# TODO fix
-def justify_text(text, max_width):
-    word_list = collections.deque()
-    line_len = 0
-    for word in text:
-        line_len = line_len + len(word) + 1
-        if line_len > max_width or word == text[-1]:
-            line_words_count = len(word_list)
-            space = max_width - (line_len - len(word) - 1 - line_words_count)
-            line_len = 0
-            if line_words_count == 1:
-                space_pad = space * " "
-                result = f"{word_list.pop()}{space_pad}"
-            else:
-                word_left = line_words_count - 1 # last word don't need
-                result = ""
-                for x in word_list:
-                    pad = math.ceil(space/word_left) if word_left > 0 else 0
-                    word_left -= 1
-                    space = space - pad
-                    space_pad = pad * " "
-                    result = f"{result}{x}{space_pad}"
-            word_list.clear()
-            print(result)
-        word_list.append(word)
 
+def justify_text(text, max_width):
+    def justify_line(w, max_w, cur_len):
+        space = max_w - (cur_len - len(w))
+        if len(w) == 1:
+            space_pad = (space + 1) * " "
+            return f"{word_list[0]}{space_pad}"
+        else:
+            r = ""
+            base_space_pad, extra = divmod(space, len(w)-1)
+            for x in w:
+                space_pad_num = (base_space_pad + 1) if extra > 0 else base_space_pad
+                space_pad = space_pad_num * " "
+                extra -= 1
+                if x == w[-1]:
+                    space_pad = ""
+                r = f"{r}{x}{space_pad}"
+            return r
+
+    word_list = []
+    line_len = 0
+    result = []
+    for word in text:
+        if (len(word) + line_len) <= max_width:
+            word_list.append(word)
+            line_len += len(word) + 1
+        else:
+            result.append(justify_line(word_list, max_width, line_len))
+            word_list = [word]
+            line_len = len(word) + 1
+    result.append(justify_line(word_list, max_width, line_len))
+    return result
 
 
 def run():
-    text = ["the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"]
+    text = ["thee", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"]
     max_width = 16
-    justify_text(text, max_width)
+    print(justify_text(text, max_width))
 
 if __name__ == '__main__':
     run()
